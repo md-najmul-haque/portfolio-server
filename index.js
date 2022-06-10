@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion } = require('mongodb');
+const { ObjectId } = require('bson')
 require('dotenv').config()
 const app = express()
 
@@ -17,6 +18,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 async function run() {
     try {
+        await client.connect();
         const projectsCollection = client.db("portfolio").collection("projects");
 
         app.get('/projects', async (req, res) => {
@@ -24,7 +26,15 @@ async function run() {
             const result = await projectsCollection.find(query).toArray();
             res.send(result);
         })
+
+        app.get('/projects/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: ObjectId(id) };
+            const result = await projectsCollection.findOne(query)
+            res.send(result);
+        })
     }
+
     finally {
 
     }
